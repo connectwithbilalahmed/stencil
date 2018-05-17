@@ -1,14 +1,43 @@
 import { Component } from '../../../../dist/index';
 
 @Component({
-  tag: 'sibling-root'
+  tag: 'sibling-root',
+  styles: `
+    :host {
+      display: block;
+      background: yellow;
+      color: maroon;
+      margin: 20px;
+      padding: 20px;
+    }
+    section {
+      background: blue;
+      color: white;
+    }
+    article {
+      background: maroon;
+      color: white;
+    }
+  `,
+  scoped: true
 })
 export class SiblingRoot {
+
+  componentWillLoad() {
+    return new Promise(resolve => {
+      setTimeout(resolve, 50);
+    });
+  }
 
   render() {
     return (
       <div>
-        Sibling root
+        <section>
+          sibling inner dom
+        </section>
+        <article>
+          <slot/>
+        </article>
       </div>
     );
   }

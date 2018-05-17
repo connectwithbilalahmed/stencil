@@ -4,7 +4,7 @@
   "types": "test-dist/types/components.d.ts",
   "collection": "test-dist/collection/collection-manifest.json",
   "scripts": {
-    "build.app": "node ../../bin/stencil build --debug --watch --es5",
+    "build.app": "node ../../bin/stencil build --dev --watch",
     "build.sibling": "node ../../bin/stencil build --config stencil.config-sibling.js --debug --es5",
     "dev": "sd concurrent \"npm run build.app\" \"stencil-dev-server\" ",
     "karma": "npm run karma.webpack && karma start karma.config.js",
