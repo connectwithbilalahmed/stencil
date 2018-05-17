@@ -3,7 +3,25 @@
 <script src="/build/testsibling.js"></script>
 <script src="/build/testapp.js"></script>
 
+<style>
+  .componentOnReady {
+    border: 5px solid red;
+  }
+</style>
+
 <multiple-apps-cmp>
   <div>main light dom</div>
   <sibling-root>sibling light dom</sibling-root>
 </multiple-apps-cmp>
+
+<script>
+  const mainRoot = document.querySelector('multiple-apps-cmp');
+  mainRoot.componentOnReady().then(function(elm) {
+    elm.classList.add('componentOnReady');
+  });
+
+  const siblingRoot = document.querySelector('sibling-root');
+  siblingRoot.componentOnReady().then(function(elm) {
+    elm.classList.add('componentOnReady');
+  });
+</script>

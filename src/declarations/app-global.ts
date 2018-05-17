@@ -1,10 +1,32 @@
 import * as d from './index';
 
 
+export interface WindowData extends Window {
+  /**
+   * queued componentOnReady() fns not handled yet
+   */
+  ['s-cr']?: QueuedComponentOnReady[];
+
+  /**
+   * namespaces of actively loading apps
+   */
+  ['s-loading']?: string[];
+
+  /**
+   * All defined custom elements
+   */
+  ['s-defined']?: { [tag: string]: boolean };
+
+  HTMLElement?: any;
+
+  Promise?: PromiseConstructor;
+}
+
+
+
 export interface AppGlobal {
   ael?: (elm: Element|Document|Window, eventName: string, cb: d.EventListenerCallback, opts?: d.ListenOptions) => void;
   components?: d.ComponentHostData[];
-  componentOnReady?: (elm: d.HostElement, resolve: (elm: d.HostElement) => void) => void;
   Context?: any;
   loadBundle?: (bundleId: string, dependents: string[], importFn: CjsImporterFn) => void;
   loaded?: boolean;
@@ -12,7 +34,19 @@ export interface AppGlobal {
   initialized?: boolean;
   raf?: DomControllerCallback;
   rel?: (elm: Element|Document|Window, eventName: string, cb: d.EventListenerCallback, opts?: d.ListenOptions) => void;
-  $r?: { 0: d.HostElement, 1: () => void }[];
+}
+
+
+export interface QueuedComponentOnReady {
+  /**
+   * Host Element
+   */
+  0: d.HostElement;
+
+  /**
+   * resolve fn
+   */
+  1: (elm: d.HostElement) => void;
 }
 
 

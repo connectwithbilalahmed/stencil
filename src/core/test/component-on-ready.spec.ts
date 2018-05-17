@@ -1,8 +1,7 @@
 import * as d from '../../declarations';
-import { connectComponentOnReady } from '../../server/connect-element';
 import { initComponentLoaded } from '../init-component-instance';
-import { initCoreComponentOnReady } from '../component-on-ready';
 import { mockDomApi, mockPlatform } from '../../testing/mocks';
+import { initHostElement } from '../init-host-element';
 
 
 describe('componentOnReady', () => {
@@ -23,18 +22,17 @@ describe('componentOnReady', () => {
 
   describe('initCoreComponentOnReady', () => {
 
-    it('should resolve if elm has loaded and is a known component', () => {
+    it('should resolve if elm has loaded and is a known component', async () => {
       const cmpRegistry: d.ComponentRegistry = {
         'ion-cmp': {}
       };
       plt = mockPlatform(null, null, cmpRegistry);
       elm = plt.domApi.$createElement('ion-cmp') as any;
-      initCoreComponentOnReady(plt, App);
-      connectComponentOnReady(App, elm);
+      initHostElement(plt, { tagNameMeta: 'ion-cmp' }, elm, 'hydrated');
       plt.hasLoadedMap.set(elm, true);
 
       let resolvedElm = null;
-      elm.componentOnReady(rElm => {
+      await elm.componentOnReady().then(rElm => {
         resolvedElm = rElm;
       });
       expect(resolvedElm).toBe(elm);
@@ -42,42 +40,27 @@ describe('componentOnReady', () => {
       expect(plt.onReadyCallbacksMap.has(elm)).toBe(false);
     });
 
-    it('should not resolve if elm hasnt loaded but is a known component', () => {
+    it('should not resolve if elm hasnt loaded but is a known component', async () => {
       const cmpRegistry: d.ComponentRegistry = {
         'ion-cmp': {}
       };
       plt = mockPlatform(null, null, cmpRegistry);
       elm = plt.domApi.$createElement('ion-cmp') as any;
-      initCoreComponentOnReady(plt, App);
-      connectComponentOnReady(App, elm);
+      initHostElement(plt, cmpRegistry['ion-cmp'], elm, 'hydrated');
 
-      let resolvedElm = null;
-      elm.componentOnReady(rElm => {
+      let resolvedElm: any = 88;
+      elm.componentOnReady().then(rElm => {
         resolvedElm = rElm;
       });
-      expect(resolvedElm).toBe(null);
+      expect(resolvedElm).toBe(88);
 
       expect(plt.onReadyCallbacksMap.has(elm)).toBe(true);
-    });
-
-    it('should resolve immediately if elm isnt a known component', () => {
-      plt = mockPlatform();
-      elm = plt.domApi.$createElement('ion-cmp') as any;
-      initCoreComponentOnReady(plt, App);
-      connectComponentOnReady(App, elm);
-
-      let resolvedElm = null;
-      elm.componentOnReady(rElm => {
-        resolvedElm = rElm;
-      });
-      expect(resolvedElm).toBe(elm);
-      expect(plt.onReadyCallbacksMap.has(elm)).toBe(false);
     });
 
   });
 
 
-  describe('initComponentLoaded', () => {
+  describe('initHostElement', () => {
 
     beforeEach(() => {
       App = {};
@@ -85,8 +68,7 @@ describe('componentOnReady', () => {
       elm = plt.domApi.$createElement('ion-cmp') as any;
       instance = new TestInstance();
       plt.instanceMap.set(elm, instance);
-      initCoreComponentOnReady(plt, App);
-      connectComponentOnReady(App, elm);
+      initHostElement(plt, { tagNameMeta: 'ion-cmp' }, elm, 'hydrated');
     });
 
     it('should call multiple componentOnReady promises', async () => {
@@ -106,22 +88,6 @@ describe('componentOnReady', () => {
       await p1;
       await p2;
 
-      expect(resolvedElm1).toBe(elm);
-      expect(resolvedElm2).toBe(elm);
-    });
-
-    it('should call multiple componentOnReady callbacks', () => {
-      let resolvedElm1 = null;
-      let resolvedElm2 = null;
-
-      elm.componentOnReady(resolveElm => {
-        resolvedElm1 = resolveElm;
-      });
-      elm.componentOnReady(resolveElm => {
-        resolvedElm2 = resolveElm;
-      });
-
-      initComponentLoaded(plt, elm, 'hydrated');
       expect(resolvedElm1).toBe(elm);
       expect(resolvedElm2).toBe(elm);
     });

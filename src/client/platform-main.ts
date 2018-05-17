@@ -10,7 +10,7 @@ import { dashToPascalCase } from '../util/helpers';
 import { enableEventListener } from '../core/listeners';
 import { generateDevInspector } from './dev-inspector';
 import { h } from '../renderer/vdom/h';
-import { initCoreComponentOnReady } from '../core/component-on-ready';
+import { drainQueuedComponentOnReadys } from '../core/component-on-ready';
 import { initHostElement } from '../core/init-host-element';
 import { initHostSnapshot } from '../core/host-snapshot';
 import { initStyleTemplate } from '../core/styles';
@@ -20,7 +20,7 @@ import { queueUpdate } from '../core/update';
 import { useScopedCss } from '../renderer/vdom/encapsulation';
 
 
-export function createPlatformMain(namespace: string, Context: d.CoreContext, win: Window, doc: Document, resourcesUrl: string, hydratedCssClass: string, customStyle?: CustomStyle) {
+export function createPlatformMain(namespace: string, Context: d.CoreContext, win: d.WindowData, doc: Document, resourcesUrl: string, hydratedCssClass: string, customStyle?: CustomStyle) {
   const cmpRegistry: d.ComponentRegistry = { 'html': {} };
   const controllerComponents: {[tag: string]: d.HostElement} = {};
   const App: d.AppGlobal = (win as any)[namespace] = (win as any)[namespace] || {};
@@ -46,7 +46,8 @@ export function createPlatformMain(namespace: string, Context: d.CoreContext, wi
   App.Context = Context;
 
   // keep a global set of tags we've already defined
-  const globalDefined: {[tag: string]: boolean} = (win as any).$definedCmps = (win as any).$definedCmps || {};
+  // DEPRECATED $definedCmps 2018-05-17
+  const globalDefined: {[tag: string]: boolean} = win['s-defined'] = (win['s-defined'] || (win as any).$definedCmps || {});
 
   // internal id increment for unique ids
   let ids = 0;
@@ -254,8 +255,7 @@ export function createPlatformMain(namespace: string, Context: d.CoreContext, wi
       .forEach(cmpMeta => defineComponent(cmpMeta, class extends HTMLElement {}));
   }
 
-  // create the componentOnReady fn
-  initCoreComponentOnReady(plt, App);
+  drainQueuedComponentOnReadys(win['s-cr'], win['s-loading'], win.HTMLElement, namespace, plt);
 
   // notify that the app has initialized and the core script is ready
   // but note that the components have not fully loaded yet

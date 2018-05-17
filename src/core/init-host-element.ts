@@ -35,6 +35,23 @@ export function initHostElement(plt: d.PlatformApi, cmpMeta: d.ComponentMeta, Ho
     initComponentLoaded(plt, (this as d.HostElement), hydratedCssClass);
   };
 
+  HostElementConstructor.componentOnReady = function() {
+    const elm = this as d.HostElement;
+
+    return new Promise<d.HostElement>(resolve => {
+      if (plt.hasLoadedMap.has(elm)) {
+        // already loaded
+        resolve(elm);
+
+      } else {
+        // host element hasn't finished loading yet
+        const onReadyCallbacks = plt.onReadyCallbacksMap.get(elm) || [];
+        onReadyCallbacks.push(resolve);
+        plt.onReadyCallbacksMap.set(elm, onReadyCallbacks);
+      }
+    });
+  };
+
   HostElementConstructor.forceUpdate = function() {
     queueUpdate(plt, (this as d.HostElement));
   };

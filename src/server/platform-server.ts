@@ -7,7 +7,6 @@ import { enableEventListener } from '../core/listeners';
 import { fillCmpMetaFromConstructor } from '../util/cmp-meta';
 import { getAppBuildDir } from '../compiler/app/app-file-naming';
 import { h } from '../renderer/vdom/h';
-import { initCoreComponentOnReady } from '../core/component-on-ready';
 import { noop } from '../util/helpers';
 import { patchDomApi } from './dom-api-server';
 import { proxyController } from '../core/proxy-controller';
@@ -110,9 +109,6 @@ export function createPlatformServer(
 
   // create the renderer which will be used to patch the vdom
   plt.render = createRendererPatch(plt, domApi);
-
-  // patch the componentOnReady fn
-  initCoreComponentOnReady(plt, App);
 
   // setup the root node of all things
   // which is the mighty <html> tag

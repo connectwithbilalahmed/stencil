@@ -20,10 +20,12 @@ export class MultipleAppsCmp {
   @Prop({ context: 'document' }) document: Document;
   @State() siblingAppHasLoaded = false;
 
-  async componentWillLoad() {
+  componentWillLoad() {
     const siblingRoot = this.document.querySelector('sibling-root') as any;
-    await siblingRoot.componentOnReady();
-    this.siblingAppHasLoaded = true;
+
+    siblingRoot.componentOnReady().then(() => {
+      this.siblingAppHasLoaded = true;
+    });
   }
 
   render() {
