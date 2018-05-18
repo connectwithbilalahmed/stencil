@@ -38,8 +38,15 @@ export function createDomApi(App: AppGlobal, win: any, doc: Document): DomApi {
 
     $createComment: (data: string) => doc.createComment(data),
 
-    $insertBefore: (parentNode: Node, childNode: Node, referenceNode: Node) =>
-      parentNode.insertBefore(childNode, referenceNode),
+    $insertBefore: (parentNode: Node, childNode: Node, referenceNode: Node) => {
+      try {
+        parentNode.insertBefore(childNode, referenceNode);
+      } catch (e) {
+        console.log('childNode', childNode && childNode.nodeName);
+        console.log('referenceNode', referenceNode && referenceNode.nodeName);
+        throw e;
+      }
+    },
 
     // https://developer.mozilla.org/en-US/docs/Web/API/ChildNode/remove
     // and it's polyfilled in es5 builds

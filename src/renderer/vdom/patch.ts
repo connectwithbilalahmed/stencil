@@ -319,7 +319,7 @@ export function createRendererPatch(plt: d.PlatformApi, domApi: d.DomApi): d.Ren
         }
 
         if (node) {
-          domApi.$insertBefore(parentReferenceNode(oldStartVnode.elm), node, referenceNode(oldStartVnode.elm));
+          domApi.$insertBefore(parentReferenceNode(oldStartVnode.elm) || parentElm, node, referenceNode(oldStartVnode.elm));
         }
       }
     }
