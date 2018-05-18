@@ -114,9 +114,10 @@ function doesNotSupportsDynamicImports(dynamicImportTest: string) {
 
 export function createComponentOnReadyPrototype(win: d.WindowData, namespace: string, HTMLElementPrototype: any) {
 
-  (win['s-loading'] = win['s-loading'] || []).push(namespace);
+  (win['s-apps'] = win['s-apps'] || []).push(namespace);
 
   if (!HTMLElementPrototype.componentOnReady) {
+
     HTMLElementPrototype.componentOnReady = function componentOnReady(): any {
       const elm = this as HTMLElement;
 
@@ -124,12 +125,32 @@ export function createComponentOnReadyPrototype(win: d.WindowData, namespace: st
         if (elm.nodeName.indexOf('-') > 0) {
           // window hasn't loaded yet and there's a
           // good chance this is a custom element
-          (win['s-cr'] = win['s-cr'] || []).push([elm, resolve]);
+          const apps = win['s-apps'];
+          let appsReady = 0;
 
-        } else {
-          // not even a custom element, just resolve it now
-          resolve(null);
+          // loop through all the app namespaces
+          for (let i = 0; i < apps.length; i++) {
+            // see if this app has "componentOnReady" setup
+            if ((win as any)[apps[i]].componentOnReady) {
+              // this app's core has loaded call its "componentOnReady"
+              if ((win as any)[apps[i]].componentOnReady(elm, resolve)) {
+                // this
+                return;
+              }
+              appsReady++;
+            }
+          }
+
+          if (appsReady < apps.length) {
+            // not all apps are ready yet
+            // add it to the queue to be figured out when they are
+            (win['s-cr'] = win['s-cr'] || []).push([elm, resolve]);
+            return;
+          }
         }
+
+        // not a recognized app component
+        resolve(null);
       }
 
       // callback wasn't provided, let's return a promise

@@ -4,24 +4,70 @@
 <script src="/build/testsibling.js"></script>
 
 <style>
+  .topDivRead {
+    border: 5px solid lime;
+  }
   .componentOnReady {
     border: 5px solid red;
   }
+  .fakeCmp {
+    border: 5px solid purple;
+    display: block;
+  }
 </style>
 
-<multiple-apps-cmp>
-  <div>main light dom</div>
-  <sibling-root>sibling light dom</sibling-root>
-</multiple-apps-cmp>
+<div id="top">
+  <section>
+    <multiple-apps-cmp>
+      <div>main light dom</div>
+      <sibling-root>sibling light dom</sibling-root>
+    </multiple-apps-cmp>
+  </section>
+  <fake-a>
+    <fake-b>
+      <div>
+        <fake-c>
+          <div>cmps</div>
+        </fake-c>
+      </div>
+    </fake-b>
+  </fake-a>
+</div>
 
 <script>
+  function loadPromises(promises, component) {
+    if (component.componentOnReady) {
+      promises.push(component.componentOnReady());
+    }
+
+    for (let i = 0; i < component.childNodes.length; i++) {
+      loadPromises(promises, component.childNodes[i]);
+    }
+  }
+
+  const fakeCmp = document.querySelector('fake-a');
+  const fakePromises = [];
+  loadPromises(fakePromises, fakeCmp);
+  Promise.all(fakePromises).then(function() {
+    fakeCmp.classList.add('fakeCmp');
+  });
+
+  const topDiv = document.querySelector('#top');
+  const promises = [];
+  loadPromises(promises, topDiv);
+  Promise.all(promises).then(function() {
+    topDiv.classList.add('topDivRead');
+  });
+
   const mainRoot = document.querySelector('multiple-apps-cmp');
   mainRoot.componentOnReady().then(function(elm) {
     elm.classList.add('componentOnReady');
   });
 
   const siblingRoot = document.querySelector('sibling-root');
+  console.log('siblingRoot1')
   siblingRoot.componentOnReady().then(function(elm) {
+    console.log('siblingRoot2')
     elm.classList.add('componentOnReady');
   });
 </script>

@@ -1,57 +1,60 @@
 import * as d from '../declarations';
 
 
-export function drainQueuedComponentOnReadys(queuedComponentOnReadys: d.QueuedComponentOnReady[], appsActivelyLoading: string[], HTMLElement: any, namespace: string, plt: d.PlatformApi, i?: number, queuedComponentOnReady?: d.QueuedComponentOnReady, onReadyCallbacks?: d.OnReadyCallback[]) {
+export function initAppComponentOnReady(win: any, queuedComponentOnReadys: d.QueuedComponentOnReady[], apps: string[], App: d.AppGlobal, plt: d.PlatformApi, i?: number) {
+
+  // add componentOnReady() to the App object
+  // this also is used to know that the App's core is ready
+  App.componentOnReady = (elm, resolve) => {
+    const cmpMeta = plt.getComponentMeta(elm);
+    if (cmpMeta) {
+      if (plt.hasLoadedMap.has(elm)) {
+        // element has already loaded, pass the resolve the element component
+        // so we know that the resolve knows it this element is an app component
+        resolve(elm);
+
+      } else {
+        // element hasn't loaded yet
+        // add this resolve specifically to this elements on ready queue
+        const onReadyCallbacks = plt.onReadyCallbacksMap.get(elm) || [];
+        onReadyCallbacks.push(resolve);
+        plt.onReadyCallbacksMap.set(elm, onReadyCallbacks);
+      }
+    }
+
+    // return a boolean if this app recognized this element or not
+    return !!cmpMeta;
+  };
 
   if (queuedComponentOnReadys) {
+    // we've got some componentOnReadys in the queue before the app was ready
     for (i = queuedComponentOnReadys.length - 1; i >= 0; i--) {
-      queuedComponentOnReady = queuedComponentOnReadys[i];
-
-      if (plt.getComponentMeta(queuedComponentOnReady[0])) {
-        // this element belongs to this app
-
-        if (plt.hasLoadedMap.has(queuedComponentOnReady[0])) {
-          // element has already loaded
-          queuedComponentOnReady[1](queuedComponentOnReady[0]);
-
-        } else {
-          // element hasn't loaded yet
-          // add this resolve specifically to this elements queue
-          onReadyCallbacks = plt.onReadyCallbacksMap.get(queuedComponentOnReady[0]) || [];
-          onReadyCallbacks.push(queuedComponentOnReady[1]);
-          plt.onReadyCallbacksMap.set(queuedComponentOnReady[0], onReadyCallbacks);
-        }
-
+      // go through each element and see if this app recongizes it
+      if (App.componentOnReady(queuedComponentOnReadys[i][0], queuedComponentOnReadys[i][1])) {
+        // turns out this element belongs to this app
         // remove the resolve from the queue so in the end
         // all that's left in the queue are elements not apart of any apps
         queuedComponentOnReadys.splice(i, 1);
       }
     }
-  }
 
-  if (appsActivelyLoading) {
-    i = appsActivelyLoading.indexOf(namespace);
-    if (i > -1) {
-      // remove this app from the array of apps actively loading
-      appsActivelyLoading.splice(i, 1);
-    }
-
-    if (!appsActivelyLoading.length) {
-      // this was the last app to load
-      // so let's clean up everything
-
-      if (HTMLElement && HTMLElement.prototype) {
-        // remove the HTMLElement.prototype.componentOnReady
-        delete HTMLElement.prototype.componentOnReady;
-      }
-
-      if (queuedComponentOnReadys) {
-        while (queuedComponentOnReady = queuedComponentOnReadys.pop()) {
-          // reject any queued componentsOnReadys that are left over
-          // since these elements were not apart of any apps
-          queuedComponentOnReady[1](null);
-        }
+    for (i = 0; i < apps.length; i++) {
+      if (!win[apps[i]].componentOnReady) {
+        // there is at least 1 apps that isn't ready yet
+        // so let's stop here cuz there's still app cores loading
+        return;
       }
     }
+
+    // if we got to this point then that means all of the apps are ready
+    // and they would have removed any of their elements from queuedComponentOnReadys
+    // so let's do the cleanup of the  remaining queuedComponentOnReadys
+    for (i = 0; i < queuedComponentOnReadys.length; i++) {
+      // resolve any queued componentsOnReadys that are left over
+      // since these elements were not apart of any apps
+      // call the resolve fn, but pass null so it's know this wasn't a known app component
+      queuedComponentOnReadys[i][1](null);
+    }
+    queuedComponentOnReadys.length = 0;
   }
 }

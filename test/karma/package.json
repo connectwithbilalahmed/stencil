@@ -9,7 +9,8 @@
     "build.sibling": "node ../../bin/stencil build --config stencil.config-sibling.js --debug --es5",
     "dev": "sd concurrent \"npm run build.app.watch\" \"stencil-dev-server\" ",
     "karma": "npm run karma.webpack && karma start karma.config.js",
-    "karma.debug": "npm run karma.webpack && karma start karma.config.js --browsers=Chrome --single-run=false",
+    "karma.chrome": "karma start karma.config.js --browsers=Chrome --single-run=false",
+    "karma.firefox": "karma start karma.config.js --browsers=Firefox --single-run=false",
     "karma.prod": "npm run tsc && npm run build.app && npm run build.sibling && npm run karma.webpack && karma start karma.config.js",
     "karma.webpack": "webpack --config test-app/esm-webpack/webpack.config.js",
     "tsc": "node ../../node_modules/.bin/tsc -p tsconfig.json"
@@ -22,6 +23,7 @@
     "karma": "^2.0.0",
     "karma-browserstack-launcher": "^1.3.0",
     "karma-chrome-launcher": "^2.2.0",
+    "karma-firefox-launcher": "^1.1.0",
     "karma-jasmine": "^1.1.1",
     "karma-polyfill": "^1.0.0",
     "karma-sauce-launcher": "^1.2.0",

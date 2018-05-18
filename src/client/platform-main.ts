@@ -10,7 +10,7 @@ import { dashToPascalCase } from '../util/helpers';
 import { enableEventListener } from '../core/listeners';
 import { generateDevInspector } from './dev-inspector';
 import { h } from '../renderer/vdom/h';
-import { drainQueuedComponentOnReadys } from '../core/component-on-ready';
+import { initAppComponentOnReady } from '../core/component-on-ready';
 import { initHostElement } from '../core/init-host-element';
 import { initHostSnapshot } from '../core/host-snapshot';
 import { initStyleTemplate } from '../core/styles';
@@ -255,7 +255,7 @@ export function createPlatformMain(namespace: string, Context: d.CoreContext, wi
       .forEach(cmpMeta => defineComponent(cmpMeta, class extends HTMLElement {}));
   }
 
-  drainQueuedComponentOnReadys(win['s-cr'], win['s-loading'], win.HTMLElement, namespace, plt);
+  initAppComponentOnReady(win, win['s-cr'], win['s-apps'], App, plt);
 
   // notify that the app has initialized and the core script is ready
   // but note that the components have not fully loaded yet
