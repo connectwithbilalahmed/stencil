@@ -4,9 +4,9 @@
   "types": "test-dist/types/components.d.ts",
   "collection": "test-dist/collection/collection-manifest.json",
   "scripts": {
-    "build.app": "node ../../bin/stencil build --debug --es5",
-    "build.app.watch": "node ../../bin/stencil build --debug --watch --es5",
-    "build.sibling": "node ../../bin/stencil build --config stencil.config-sibling.js --debug --es5",
+    "build.app": "node ../../bin/stencil build --dev --es5",
+    "build.app.watch": "node ../../bin/stencil build --dev --watch --es5",
+    "build.sibling": "node ../../bin/stencil build --config stencil.config-sibling.js --dev --es5",
     "dev": "sd concurrent \"npm run build.app.watch\" \"stencil-dev-server\" ",
     "karma": "npm run karma.webpack && karma start karma.config.js",
     "karma.chrome": "karma start karma.config.js --browsers=Chrome --single-run=false",
