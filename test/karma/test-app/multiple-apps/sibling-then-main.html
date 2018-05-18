@@ -35,37 +35,39 @@
 </div>
 
 <script>
-  function loadPromises(promises, component) {
-    if (component.componentOnReady) {
-      promises.push(component.componentOnReady());
+  if (window.Promise) {
+    function loadPromises(promises, component) {
+      if (component.componentOnReady) {
+        promises.push(component.componentOnReady());
+      }
+
+      for (let i = 0; i < component.childNodes.length; i++) {
+        loadPromises(promises, component.childNodes[i]);
+      }
     }
 
-    for (let i = 0; i < component.childNodes.length; i++) {
-      loadPromises(promises, component.childNodes[i]);
-    }
+    const fakeCmp = document.querySelector('fake-a');
+    const fakePromises = [];
+    loadPromises(fakePromises, fakeCmp);
+    Promise.all(fakePromises).then(function() {
+      fakeCmp.classList.add('fakeCmp');
+    });
+
+    const topDiv = document.querySelector('#top');
+    const promises = [];
+    loadPromises(promises, topDiv);
+    Promise.all(promises).then(function() {
+      topDiv.classList.add('topDivRead');
+    });
+
+    const mainRoot = document.querySelector('multiple-apps-cmp');
+    mainRoot.componentOnReady().then(function(elm) {
+      elm.classList.add('componentOnReady');
+    });
+
+    const siblingRoot = document.querySelector('sibling-root');
+    siblingRoot.componentOnReady().then(function(elm) {
+      elm.classList.add('componentOnReady');
+    });
   }
-
-  const fakeCmp = document.querySelector('fake-a');
-  const fakePromises = [];
-  loadPromises(fakePromises, fakeCmp);
-  Promise.all(fakePromises).then(function() {
-    fakeCmp.classList.add('fakeCmp');
-  });
-
-  const topDiv = document.querySelector('#top');
-  const promises = [];
-  loadPromises(promises, topDiv);
-  Promise.all(promises).then(function() {
-    topDiv.classList.add('topDivRead');
-  });
-
-  const mainRoot = document.querySelector('multiple-apps-cmp');
-  mainRoot.componentOnReady().then(function(elm) {
-    elm.classList.add('componentOnReady');
-  });
-
-  const siblingRoot = document.querySelector('sibling-root');
-  siblingRoot.componentOnReady().then(function(elm) {
-    elm.classList.add('componentOnReady');
-  });
 </script>
