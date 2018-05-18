@@ -119,17 +119,18 @@ export function createComponentOnReadyPrototype(win: d.WindowData, namespace: st
   if (!HTMLElementPrototype.componentOnReady) {
 
     HTMLElementPrototype.componentOnReady = function componentOnReady(): any {
-      const elm = this as HTMLElement;
+      /*tslint:disable*/
+      var elm = this as HTMLElement;
 
       function executor(resolve: (elm: HTMLElement) => void) {
         if (elm.nodeName.indexOf('-') > 0) {
           // window hasn't loaded yet and there's a
           // good chance this is a custom element
-          const apps = win['s-apps'];
-          let appsReady = 0;
+          var apps = win['s-apps'];
+          var appsReady = 0;
 
           // loop through all the app namespaces
-          for (let i = 0; i < apps.length; i++) {
+          for (var i = 0; i < apps.length; i++) {
             // see if this app has "componentOnReady" setup
             if ((win as any)[apps[i]].componentOnReady) {
               // this app's core has loaded call its "componentOnReady"
